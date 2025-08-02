@@ -1,6 +1,6 @@
 {
     'name': 'Shift Management',
-    'version': '1.0.0',
+    'version': '1.0',
     'category': 'Human Resources',
     'summary': 'Vardiya yönetimi modülü',
     'description': """
@@ -10,11 +10,9 @@
         - Çalışan vardiya atamaları
         - Vardiya takvimi görünümü
         - Vardiya raporları
-        - Analitik hesap entegrasyonu
-        - Departman yönetimi
     """,
-    'author': 'Tofta Mars',
-    'website': 'https://github.com/toftamars/Shift',
+    'author': 'Your Company',
+    'website': 'https://www.yourcompany.com',
     'depends': ['base', 'hr', 'hr_attendance', 'analytic'],
     'data': [
         'security/ir.model.access.csv',
@@ -30,10 +28,4 @@
     'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
-    'sequence': 1,
-    'maintainer': 'Tofta Mars',
-    'support': 'https://github.com/toftamars/Shift/issues',
-    'images': [],
-    'price': 0.0,
-    'currency': 'EUR',
 } 
