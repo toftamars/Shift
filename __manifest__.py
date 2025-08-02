@@ -10,9 +10,11 @@
         - Çalışan vardiya atamaları
         - Vardiya takvimi görünümü
         - Vardiya raporları
+        - Analitik hesap entegrasyonu
+        - Departman yönetimi
     """,
-    'author': 'Your Company',
-    'website': 'https://www.yourcompany.com',
+    'author': 'Tofta',
+    'website': 'https://github.com/toftamars/Shift',
     'depends': ['base', 'hr', 'hr_attendance', 'analytic'],
     'data': [
         'security/ir.model.access.csv',
