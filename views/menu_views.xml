@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Ana Vardiya Menüsü -->
+    <menuitem id="menu_shift_root" 
+              name="Vardiya Yönetimi" 
+              sequence="50"/>
+
+    <!-- Vardiyalar Menüsü -->
+    <menuitem id="menu_shift_main" 
+              name="Vardiyalar" 
+              parent="menu_shift_root" 
+              sequence="10"/>
+
+    <!-- Vardiya Listesi -->
+    <menuitem id="menu_shift_list" 
+              name="Vardiya Listesi" 
+              parent="menu_shift_main" 
+              action="action_shift" 
+              sequence="10"/>
+
+    <!-- Departmanlar -->
+    <menuitem id="menu_shift_department" 
+              name="Departmanlar" 
+              parent="menu_shift_main" 
+              action="action_shift_department" 
+              sequence="20"/>
+
+    <!-- İnsan Kaynakları Menüsüne Alt Menü Ekleme -->
+    <menuitem id="menu_hr_shift" 
+              name="Vardiya Yönetimi" 
+              parent="hr.menu_human_resources_root" 
+              sequence="50"/>
+
+    <!-- Vardiya Yönetimi Alt Menüsü -->
+    <menuitem id="menu_shift_management" 
+              name="Vardiyalar" 
+              parent="menu_hr_shift" 
+              action="action_shift" 
+              sequence="10"/>
+
+    <!-- Departman Yönetimi Alt Menüsü -->
+    <menuitem id="menu_department_management" 
+              name="Departmanlar" 
+              parent="menu_hr_shift" 
+              action="action_shift_department" 
+              sequence="20"/>
+</odoo> 

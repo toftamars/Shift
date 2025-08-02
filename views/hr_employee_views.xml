@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Çalışan Form View Genişletme -->
+    <record id="view_employee_form_inherit_shift" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.shift</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Vardiya Bilgileri" name="shift_info">
+                    <group>
+                        <group string="Analitik Hesap ve Departman">
+                            <field name="analytic_account_id"/>
+                            <field name="shift_department_id" domain="[('analytic_account_id', '=', analytic_account_id)]"/>
+                        </group>
+                        <group string="Vardiya Tercihleri">
+                            <field name="preferred_shift_type"/>
+                            <field name="max_hours_per_week"/>
+                            <field name="current_week_hours" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="shift_ids" readonly="1">
+                        <tree>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="shift_type"/>
+                            <field name="start_time" widget="float_time"/>
+                            <field name="end_time" widget="float_time"/>
+                            <field name="duration"/>
+                            <field name="state"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Çalışan Tree View Genişletme -->
+    <record id="view_employee_tree_inherit_shift" model="ir.ui.view">
+        <field name="name">hr.employee.tree.inherit.shift</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='job_title']" position="after">
+                <field name="analytic_account_id" optional="show"/>
+                <field name="shift_department_id" optional="show"/>
+                <field name="preferred_shift_type" optional="show"/>
+                <field name="current_week_hours" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo> 

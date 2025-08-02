@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vardiya Form View -->
+    <record id="view_shift_form" model="ir.ui.view">
+        <field name="name">shift.shift.form</field>
+        <field name="model">shift.shift</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Onayla" type="object" 
+                            class="oe_highlight" states="draft"/>
+                    <button name="action_start" string="Başlat" type="object" 
+                            class="oe_highlight" states="confirmed"/>
+                    <button name="action_complete" string="Tamamla" type="object" 
+                            class="oe_highlight" states="in_progress"/>
+                    <button name="action_cancel" string="İptal Et" type="object" 
+                            states="draft,confirmed,in_progress"/>
+                    <button name="action_draft" string="Taslağa Döndür" type="object" 
+                            states="cancelled"/>
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="draft,confirmed,in_progress,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Vardiya Adı"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="analytic_account_id"/>
+                            <field name="department_id"/>
+                            <field name="date"/>
+                            <field name="shift_type"/>
+                            <field name="start_time" widget="float_time"/>
+                            <field name="end_time" widget="float_time"/>
+                            <field name="duration" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="employee_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notlar">
+                            <field name="notes" placeholder="Vardiya hakkında notlar..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vardiya Tree View -->
+    <record id="view_shift_tree" model="ir.ui.view">
+        <field name="name">shift.shift.tree</field>
+        <field name="model">shift.shift</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="analytic_account_id"/>
+                <field name="department_id"/>
+                <field name="date"/>
+                <field name="shift_type"/>
+                <field name="start_time" widget="float_time"/>
+                <field name="end_time" widget="float_time"/>
+                <field name="duration"/>
+                <field name="employee_ids" widget="many2many_tags"/>
+                <field name="state" decoration-info="state == 'draft'" 
+                       decoration-success="state == 'completed'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Vardiya Search View -->
+    <record id="view_shift_search" model="ir.ui.view">
+        <field name="name">shift.shift.search</field>
+        <field name="model">shift.shift</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="analytic_account_id"/>
+                <field name="department_id"/>
+                <field name="employee_ids"/>
+                <field name="shift_type"/>
+                <filter string="Bugün" name="today" 
+                        domain="[('date', '=', context_today())]"/>
+                <filter string="Bu Hafta" name="this_week" 
+                        domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                <filter string="Taslak" name="draft" 
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="Onaylandı" name="confirmed" 
+                        domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Devam Ediyor" name="in_progress" 
+                        domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Tamamlandı" name="completed" 
+                        domain="[('state', '=', 'completed')]"/>
+                <group expand="0" string="Grupla">
+                    <filter string="Durum" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Vardiya Tipi" name="group_shift_type" context="{'group_by': 'shift_type'}"/>
+                    <filter string="Tarih" name="group_date" context="{'group_by': 'date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Vardiya Calendar View -->
+    <record id="view_shift_calendar" model="ir.ui.view">
+        <field name="name">shift.shift.calendar</field>
+        <field name="model">shift.shift</field>
+        <field name="arch" type="xml">
+            <calendar string="Vardiyalar" date_start="date" color="shift_type" 
+                      event_open_popup="true" quick_add="false">
+                <field name="name"/>
+                <field name="start_time" widget="float_time"/>
+                <field name="end_time" widget="float_time"/>
+                <field name="employee_ids" widget="many2many_tags"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Vardiya Action -->
+    <record id="action_shift" model="ir.actions.act_window">
+        <field name="name">Vardiyalar</field>
+        <field name="res_model">shift.shift</field>
+        <field name="view_mode">tree,form,calendar</field>
+        <field name="context">{'search_default_today': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Henüz vardiya oluşturulmamış
+            </p>
+            <p>
+                Vardiya planlaması yapmak için yeni bir vardiya oluşturun.
+            </p>
+        </field>
+    </record>
+</odoo> 

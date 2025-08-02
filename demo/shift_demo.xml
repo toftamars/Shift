@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Demo Analitik Hesaplar -->
+        <record id="analytic_account_demo_1" model="account.analytic.account">
+            <field name="name">Proje A - Vardiya Yönetimi</field>
+            <field name="code">PROJ_A</field>
+        </record>
+
+        <record id="analytic_account_demo_2" model="account.analytic.account">
+            <field name="name">Proje B - Üretim</field>
+            <field name="code">PROJ_B</field>
+        </record>
+
+        <!-- Demo Departmanlar -->
+        <record id="department_demo_1" model="shift.department">
+            <field name="name">Üretim Departmanı</field>
+            <field name="code">URETIM</field>
+            <field name="analytic_account_id" ref="analytic_account_demo_1"/>
+            <field name="description">Ana üretim departmanı</field>
+        </record>
+
+        <record id="department_demo_2" model="shift.department">
+            <field name="name">Kalite Kontrol</field>
+            <field name="code">KALITE</field>
+            <field name="analytic_account_id" ref="analytic_account_demo_1"/>
+            <field name="description">Kalite kontrol departmanı</field>
+        </record>
+
+        <record id="department_demo_3" model="shift.department">
+            <field name="name">Bakım Departmanı</field>
+            <field name="code">BAKIM</field>
+            <field name="analytic_account_id" ref="analytic_account_demo_2"/>
+            <field name="description">Teknik bakım departmanı</field>
+        </record>
+
+        <!-- Demo Vardiyalar -->
+        <record id="shift_demo_1" model="shift.shift">
+            <field name="name">Sabah Vardiyası - 2024-01-15</field>
+            <field name="analytic_account_id" ref="analytic_account_demo_1"/>
+            <field name="department_id" ref="department_demo_1"/>
+            <field name="date">2024-01-15</field>
+            <field name="shift_type">morning</field>
+            <field name="start_time">8.0</field>
+            <field name="end_time">16.0</field>
+            <field name="state">confirmed</field>
+            <field name="notes">Normal sabah vardiyası</field>
+        </record>
+
+        <record id="shift_demo_2" model="shift.shift">
+            <field name="name">Öğleden Sonra Vardiyası - 2024-01-15</field>
+            <field name="analytic_account_id" ref="analytic_account_demo_1"/>
+            <field name="department_id" ref="department_demo_2"/>
+            <field name="date">2024-01-15</field>
+            <field name="shift_type">afternoon</field>
+            <field name="start_time">16.0</field>
+            <field name="end_time">24.0</field>
+            <field name="state">confirmed</field>
+            <field name="notes">Öğleden sonra vardiyası</field>
+        </record>
+
+        <record id="shift_demo_3" model="shift.shift">
+            <field name="name">Gece Vardiyası - 2024-01-15</field>
+            <field name="analytic_account_id" ref="analytic_account_demo_2"/>
+            <field name="department_id" ref="department_demo_3"/>
+            <field name="date">2024-01-15</field>
+            <field name="shift_type">night</field>
+            <field name="start_time">22.0</field>
+            <field name="end_time">6.0</field>
+            <field name="state">confirmed</field>
+            <field name="notes">Gece vardiyası</field>
+        </record>
+
+        <record id="shift_demo_4" model="shift.shift">
+            <field name="name">Sabah Vardiyası - 2024-01-16</field>
+            <field name="analytic_account_id" ref="analytic_account_demo_1"/>
+            <field name="department_id" ref="department_demo_1"/>
+            <field name="date">2024-01-16</field>
+            <field name="shift_type">morning</field>
+            <field name="start_time">8.0</field>
+            <field name="end_time">16.0</field>
+            <field name="state">draft</field>
+            <field name="notes">Planlanmış sabah vardiyası</field>
+        </record>
+    </data>
+</odoo> 

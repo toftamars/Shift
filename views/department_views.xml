@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Departman Form View -->
+    <record id="view_shift_department_form" model="ir.ui.view">
+        <field name="name">shift.department.form</field>
+        <field name="model">shift.department</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Departman Adı"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="analytic_account_id"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Açıklama">
+                            <field name="description" placeholder="Departman açıklaması..."/>
+                        </page>
+                        <page string="Personel" name="employees">
+                            <field name="employee_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="job_title"/>
+                                    <field name="work_email"/>
+                                    <field name="work_phone"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Departman Tree View -->
+    <record id="view_shift_department_tree" model="ir.ui.view">
+        <field name="name">shift.department.tree</field>
+        <field name="model">shift.department</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="analytic_account_id"/>
+                <field name="employee_count"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Departman Search View -->
+    <record id="view_shift_department_search" model="ir.ui.view">
+        <field name="name">shift.department.search</field>
+        <field name="model">shift.department</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="analytic_account_id"/>
+                <filter string="Aktif" name="active" domain="[('active', '=', True)]"/>
+                <filter string="Pasif" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Grupla">
+                    <filter string="Analitik Hesap" name="group_analytic" context="{'group_by': 'analytic_account_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Departman Action -->
+    <record id="action_shift_department" model="ir.actions.act_window">
+        <field name="name">Departmanlar</field>
+        <field name="res_model">shift.department</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Henüz departman oluşturulmamış
+            </p>
+            <p>
+                Vardiya departmanları oluşturmak için yeni bir departman ekleyin.
+            </p>
+        </field>
+    </record>
+</odoo> 
