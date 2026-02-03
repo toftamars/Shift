@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Command, LayoutGrid, Users, Building2, Zap, Settings, LogOut } from 'lucide-react';
+import { LayoutGrid, Users, Building2, Zap, Settings, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { logout } from '../store/authSlice';
 
@@ -25,15 +25,6 @@ export const Sidebar: React.FC = () => {
 
     return (
         <nav className="sidebar" aria-label="Ana menü">
-            <button
-                type="button"
-                className="logo sidebar-icon"
-                aria-label="Ana sayfa"
-                style={btnStyle}
-                onClick={() => navigate('/')}
-            >
-                <Command size={24} aria-hidden="true" />
-            </button>
             <button
                 type="button"
                 className={`sidebar-icon ${isPlanner ? 'active' : ''}`}
