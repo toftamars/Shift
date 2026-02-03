@@ -138,7 +138,7 @@ export async function POST(request: Request) {
         for (const item of schedule) {
             await query(
                 `INSERT INTO shifts (employee_id, shift_type_id, shift_date, start_time, end_time, status)
-                 VALUES ($1, $2, $3, $4, $5, 'APPROVED')`,
+                 VALUES ($1, $2, $3, $4, $5, 'SCHEDULED')`,
                 [item.employee_id, item.shift_type_id, item.shift_date, item.start_time, item.end_time]
             );
         }
