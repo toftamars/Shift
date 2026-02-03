@@ -30,7 +30,7 @@ function buildShiftsByKey(shifts: Shift[], weekDays: Date[], employeeIds: string
 }
 
 function PlannerPage() {
-  const [currentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,8 +43,12 @@ function PlannerPage() {
   const [assignError, setAssignError] = useState<string | null>(null);
   const [selectedShiftTypeId, setSelectedShiftTypeId] = useState<string>('');
 
-  const weekStart = useMemo(() => startOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
-  const weekEnd = useMemo(() => endOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
+  useEffect(() => {
+    setCurrentDate(new Date());
+  }, []);
+
+  const weekStart = useMemo(() => currentDate ? startOfWeek(currentDate, { weekStartsOn: 1 }) : new Date(), [currentDate]);
+  const weekEnd = useMemo(() => currentDate ? endOfWeek(currentDate, { weekStartsOn: 1 }) : new Date(), [currentDate]);
   const weekDays = useMemo(
     () => Array.from({ length: 7 }).map((_, i) => addDays(weekStart, i)),
     [weekStart]
@@ -62,6 +66,7 @@ function PlannerPage() {
   );
 
   useEffect(() => {
+    if (!currentDate) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -152,6 +157,10 @@ function PlannerPage() {
       .finally(() => setAssignSubmitLoading(false));
   };
 
+  if (!currentDate) {
+    return null;
+  }
+
   if (loading && employees.length === 0) {
     return (
       <div className="app-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -208,30 +217,30 @@ function PlannerPage() {
                 </div>
               ) : (
                 <>
-              {employees.map((emp) => (
-                <div key={emp.id} className="grid-cell header-cell">
-                  <div style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.05em' }}>{emp.name}</div>
-                  <div className="mono" style={{ fontSize: '0.7rem', opacity: 0.7 }}>{emp.role}</div>
-                </div>
-              ))}
-              {weekDays.map((day) =>
-                employees.map((emp) => (
-                  <div
-                    key={`${emp.id}-${day.toString()}`}
-                    className="grid-cell grid-cell-shift"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => openAssignModal(String(emp.id), day)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAssignModal(String(emp.id), day); } }}
-                    aria-label={`${emp.name}, ${format(day, 'd MMMM')} – vardiya ata`}
-                    style={{ cursor: 'pointer', minHeight: 100 }}
-                  >
-                    {getShiftsForDay(emp.id, day).map((shift) => (
-                      <ShiftCard key={shift.id} shift={shift} />
-                    ))}
-                  </div>
-                ))
-              )}
+                  {employees.map((emp) => (
+                    <div key={emp.id} className="grid-cell header-cell">
+                      <div style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.05em' }}>{emp.name}</div>
+                      <div className="mono" style={{ fontSize: '0.7rem', opacity: 0.7 }}>{emp.role}</div>
+                    </div>
+                  ))}
+                  {weekDays.map((day) =>
+                    employees.map((emp) => (
+                      <div
+                        key={`${emp.id}-${day.toString()}`}
+                        className="grid-cell grid-cell-shift"
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => openAssignModal(String(emp.id), day)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAssignModal(String(emp.id), day); } }}
+                        aria-label={`${emp.name}, ${format(day, 'd MMMM')} – vardiya ata`}
+                        style={{ cursor: 'pointer', minHeight: 100 }}
+                      >
+                        {getShiftsForDay(emp.id, day).map((shift) => (
+                          <ShiftCard key={shift.id} shift={shift} />
+                        ))}
+                      </div>
+                    ))
+                  )}
                 </>
               )}
             </div>
