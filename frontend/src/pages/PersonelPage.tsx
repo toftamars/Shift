@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { employeesApi } from '../services/api';
 import { Sidebar } from '../components/Sidebar';
 
