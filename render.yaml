@@ -1,0 +1,26 @@
+# Render Blueprint - Backend API
+# https://render.com/docs/blueprint-spec
+# Repo'yu Render'a bağlayıp "Apply" ile tek tıkla deploy edebilirsin.
+
+services:
+  - type: web
+    name: shift-planner-api
+    runtime: node
+    rootDir: backend
+
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+        # Render Dashboard → Environment → DATABASE_URL ekle (Supabase connection string)
+      - key: JWT_SECRET
+        generateValue: true
+        # Üretilen secret'ı kopyala veya kendi secret'ını ekle
+      - key: CORS_ORIGIN
+        sync: false
+        # Frontend URL (Vercel): https://shift-planner-xxx.vercel.app (virgülle birden fazla eklenebilir)
