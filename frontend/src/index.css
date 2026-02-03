@@ -45,7 +45,7 @@ body {
   overflow: hidden;
 }
 
-/* Dekoratif grain; tıklamaları engellememesi için z-index düşük, pointer-events: none */
+/* Dekoratif grain; tıklamaları asla engellememesi için arkada ve pointer-events: none */
 body::before {
   content: "";
   position: fixed;
@@ -53,14 +53,18 @@ body::before {
   background-image: var(--grain);
   opacity: 0.03;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 /* --- Layout System --- */
+/* Tıklamaların butonlara ulaşması için katman ve pointer-events net */
 .app-container {
   display: flex;
   height: 100vh;
   width: 100vw;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 .sidebar {
@@ -224,9 +228,11 @@ header {
   filter: invert(1);
 }
 
-.sidebar-icon {
+.sidebar-icon,
+.sidebar button {
   color: var(--text-dim);
   cursor: pointer;
+  pointer-events: auto;
   transition: color 0.3s ease;
 }
 
@@ -235,6 +241,13 @@ header {
 }
 
 /* Web Interface Guidelines: focus-visible, no outline-none without replacement */
+button,
+a[href],
+input,
+[role="button"] {
+  pointer-events: auto;
+}
+
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,

@@ -57,12 +57,14 @@ function PlannerPage() {
     Promise.all([employeesApi.list(), shiftsApi.listByDateRange(fromDate, toDate)])
       .then(([empRes, shiftsRes]) => {
         if (cancelled) return;
-        const empList = (empRes.data || []).map((e) => ({
+        const empData = Array.isArray(empRes.data) ? empRes.data : [];
+        const shiftData = Array.isArray(shiftsRes.data) ? shiftsRes.data : [];
+        const empList = empData.map((e: { id: string; name?: string; employee_code: string; department_id?: string | null }) => ({
           id: e.id,
           name: e.name || e.employee_code || '—',
           role: e.department_id || 'Personel',
         }));
-        const shiftList: Shift[] = (shiftsRes.data || []).map((s) => ({
+        const shiftList: Shift[] = shiftData.map((s: { id: string; employee_id: string; shift_date: string; start_time: string; end_time: string }) => ({
           id: s.id,
           employeeId: s.employee_id,
           day: new Date(s.shift_date),
