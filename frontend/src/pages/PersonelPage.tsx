@@ -7,7 +7,6 @@ import { AddEmployeeModal } from '../components/AddEmployeeModal';
 interface EmployeeRow {
   id: string;
   name: string;
-  employee_code: string;
   department_id: string | null;
   department_name?: string | null;
 }
@@ -90,7 +89,6 @@ export function PersonelPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid var(--border)' }}>
                 <thead>
                   <tr style={{ background: 'var(--panel)' }}>
-                    <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Sicil</th>
                     <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Ad Soyad</th>
                     <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Departman</th>
                     <th style={{ padding: 12, width: 56, borderBottom: '1px solid var(--border)' }} aria-label="İşlemler" />
@@ -99,14 +97,13 @@ export function PersonelPage() {
                 <tbody>
                   {list.map((e) => (
                     <tr key={e.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: 12 }} className="mono">{e.employee_code}</td>
                       <td style={{ padding: 12 }}>{e.name || '—'}</td>
                       <td style={{ padding: 12 }}>{e.department_name ?? e.department_id ?? '—'}</td>
                       <td style={{ padding: 8 }}>
                         <button
                           type="button"
-                          aria-label={`${e.name || e.employee_code} kaydını sil`}
-                          onClick={() => handleDelete(e.id, e.name || e.employee_code)}
+                          aria-label={`${e.name || '—'} kaydını sil`}
+                          onClick={() => handleDelete(e.id, e.name || '—')}
                           disabled={deletingId === e.id}
                           style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: deletingId === e.id ? 'wait' : 'pointer', padding: 6 }}
                         >

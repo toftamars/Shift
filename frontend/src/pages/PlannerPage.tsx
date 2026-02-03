@@ -73,9 +73,9 @@ function PlannerPage() {
         if (cancelled) return;
         const empData = Array.isArray(empRes.data) ? empRes.data : [];
         const shiftData = Array.isArray(shiftsRes.data) ? shiftsRes.data : [];
-        const empList = empData.map((e: { id: string; name?: string; employee_code: string; department_id?: string | null; department_name?: string | null }) => ({
+        const empList = empData.map((e: { id: string; name?: string; department_id?: string | null; department_name?: string | null }) => ({
           id: e.id,
-          name: e.name || e.employee_code || '—',
+          name: e.name || '—',
           role: e.department_name || '—',
         }));
         const shiftList: Shift[] = shiftData.map((s: { id: string; employee_id: string; shift_date: string; start_time: string; end_time: string }) => ({

@@ -12,9 +12,14 @@
 
 **Proje URL:** https://iggymtcteabswsrginyi.supabase.co
 
-### 1.1 Veritabanı şeması
-1. **SQL Editor** → **New query** → `database/schema.sql` içeriğini yapıştır → **Run**
-2. Sonra **`database/supabase-auth-sync.sql`** içeriğini yapıştır → **Run** (Supabase Auth ile `public.users` senkronu + `password_hash` nullable)
+### 1.1 Veritabanı şeması (Supabase + uygulama uyumlu)
+
+**Yeni kurulum (önerilen):** Tek dosyada tablolar + Auth senkron + nullable email/sicil no:
+1. **SQL Editor** → **New query** → `database/supabase-full-schema.sql` içeriğini yapıştır → **Run**
+
+**Eski kurulum (zaten schema.sql çalıştırdıysanız):**
+1. **SQL Editor** → `database/migration-nullable-email-employee.sql` çalıştır (e-posta ve sicil no nullable)
+2. Sonra **`database/supabase-auth-sync.sql`** çalıştır (Auth → `public.users` senkronu)
 
 ### 1.2 Kullanıcı ekleme (Supabase Auth)
 1. **Authentication** → **Users** → **Add user** → **Create new user**

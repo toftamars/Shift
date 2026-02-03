@@ -62,7 +62,7 @@ api.interceptors.response.use(
 
 export const employeesApi = {
   list: (departmentId?: string) =>
-    api.get<Array<{ id: string; name: string; employee_code: string; department_id: string | null; department_name?: string | null }>>(
+    api.get<Array<{ id: string; name: string; department_id: string | null; department_name?: string | null }>>(
       '/employees' + (departmentId ? `?department_id=${departmentId}` : '')
     ),
   get: (id: string) => api.get(`/employees/${id}`),

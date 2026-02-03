@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { Router, Request, Response } from 'express';
 import { query, getClient } from '../config/database';
 import { authenticate } from '../middleware/auth.middleware';
@@ -7,7 +6,7 @@ const router = Router();
 
 router.use(authenticate);
 
-// Sayfadan doğrudan ekleme: name + department + hire_date; e-posta ve sicil no otomatik üretilir
+// Sayfadan doğrudan ekleme: sadece name + department + hire_date (e-posta ve sicil no yok)
 router.post('/', async (req: Request, res: Response) => {
   try {
     const { name, department_id: departmentId, hire_date: hireDate } = req.body;
@@ -16,24 +15,21 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Ad soyad ve işe giriş tarihi gerekli' });
     }
     const deptId = departmentId && String(departmentId).trim() !== '' ? departmentId : null;
-    const shortId = randomUUID().replace(/-/g, '').slice(0, 8);
-    const emailStr = `emp-${shortId}@internal`;
-    const code = `EMP-${shortId}`;
 
     const client = await getClient();
     try {
       await client.query('BEGIN');
       const userRes = await client.query(
-        `INSERT INTO users (email, full_name, role) VALUES ($1, $2, 'EMPLOYEE')
+        `INSERT INTO users (email, full_name, role) VALUES (NULL, $1, 'EMPLOYEE')
          RETURNING id`,
-        [emailStr, fullName]
+        [fullName]
       );
       const userId = userRes.rows[0].id;
       const empRes = await client.query(
         `INSERT INTO employees (user_id, department_id, employee_code, hire_date)
-         VALUES ($1, $2, $3, $4)
+         VALUES ($1, $2, NULL, $3)
          RETURNING id, user_id, department_id, employee_code, hire_date`,
-        [userId, deptId, code, hireDate]
+        [userId, deptId, hireDate]
       );
       await client.query('COMMIT');
       const row = empRes.rows[0];
