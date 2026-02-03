@@ -7,7 +7,7 @@ export async function GET() {
             `SELECT id, name, start_time, end_time, duration_hours, color_code, is_overnight
        FROM shift_types ORDER BY start_time`
         );
-        const rows = result.rows.map((row: any) => ({
+        const rows = result.rows.map((row) => ({
             ...row,
             start_time: row.start_time?.toString?.()?.slice(0, 5) ?? row.start_time,
             end_time: row.end_time?.toString?.()?.slice(0, 5) ?? row.end_time,

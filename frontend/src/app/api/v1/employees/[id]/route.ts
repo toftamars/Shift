@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+interface RouteParams {
+    params: Promise<{ id: string }>;
+}
+
+export async function GET(request: Request, { params }: RouteParams) {
     try {
         const { id } = await params;
         const result = await query(
@@ -19,7 +23,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: RouteParams) {
     try {
         const { id } = await params;
         const getRes = await query('SELECT user_id FROM employees WHERE id = $1', [id]);

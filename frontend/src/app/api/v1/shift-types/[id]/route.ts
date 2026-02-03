@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+interface RouteParams {
+    params: Promise<{ id: string }>;
+}
+
+export async function GET(request: Request, { params }: RouteParams) {
     try {
         const { id } = await params;
-
-        // UUID kontrolü yapmıyoruz, doğrudan sorguluyoruz. Postgres geçersiz UUID ise hata verebilir.
-        // İsterseniz validateUUID eklenebilir.
-
         const result = await query(
             'SELECT id, name, start_time, end_time, duration_hours, color_code, is_overnight FROM shift_types WHERE id = $1',
             [id]
@@ -28,7 +28,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 }
 
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(request: Request, { params }: RouteParams) {
     try {
         const { id } = await params;
         const body = await request.json();
@@ -62,7 +62,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: RouteParams) {
     try {
         const { id } = await params;
         const check = await query('SELECT 1 FROM shifts WHERE shift_type_id = $1 LIMIT 1', [id]);
