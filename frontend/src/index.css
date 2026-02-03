@@ -123,13 +123,41 @@ header {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Sol: tarih sütunu (sabit), sağ: personel sütunları */
 .shift-grid {
-  display: grid;
-  /* İlk sütun tarih için sabit, diğerleri personel sayısı kadar eşit paylaşımlı */
-  grid-template-columns: 140px repeat(var(--emp-count, 4), 1fr);
+  display: flex;
+  flex-direction: row;
   border: 1px solid var(--border);
   background: var(--border);
+  min-height: 0;
+}
+
+/* Sol sütun: Takvim + günler alt alta */
+.shift-grid-date-col {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 140px;
+  border-right: 1px solid var(--border);
+}
+
+.shift-grid-date-col .date-col-cell {
+  border-bottom: 1px solid var(--border);
+}
+
+.shift-grid-date-col .date-col-cell:last-child {
+  border-bottom: none;
+}
+
+/* Sağ: personel grid (başlık satırı + 7 gün satırı) */
+.shift-grid-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--emp-count, 4), 1fr);
+  grid-auto-rows: minmax(100px, auto);
   gap: 1px;
+  overflow: auto;
 }
 
 .grid-cell {
@@ -159,14 +187,11 @@ header {
 
 .date-cell {
   background: var(--panel);
-  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: sticky;
-  left: 0;
-  z-index: 5;
+  min-height: 100px;
 }
 
 .personel-info {

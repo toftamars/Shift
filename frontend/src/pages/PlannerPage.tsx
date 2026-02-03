@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { format, startOfWeek, endOfWeek, addDays, isSameDay } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { employeesApi, shiftsApi } from '../services/api';
@@ -133,31 +133,36 @@ function PlannerPage() {
         ) : null}
         <div className="content-grid-wrapper">
           <div className="shift-grid" role="grid" aria-label="Haftalık vardiya planı">
-            <div className="grid-cell header-cell">
-              <div className="mono">Takvim</div>
-            </div>
-            {employees.map((emp) => (
-              <div key={emp.id} className="grid-cell header-cell">
-                <div style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.05em' }}>{emp.name}</div>
-                <div className="mono" style={{ fontSize: '8px', opacity: 0.5 }}>{emp.role}</div>
+            {/* Sol sütun: tarih – hep solda, günler alt alta */}
+            <div className="shift-grid-date-col">
+              <div className="grid-cell header-cell date-col-cell">
+                <div className="mono">Takvim</div>
               </div>
-            ))}
-
-            {weekDays.map((day) => (
-              <React.Fragment key={day.toString()}>
-                <div className="grid-cell date-cell">
+              {weekDays.map((day) => (
+                <div key={day.toString()} className="grid-cell date-cell date-col-cell">
                   <div className="mono" style={{ opacity: 0.6 }}>{format(day, 'EEE', { locale: tr })}</div>
                   <div style={{ fontSize: '1.8rem', fontWeight: 900, lineHeight: 1 }}>{format(day, 'dd')}</div>
                 </div>
-                {employees.map((emp) => (
-                  <div key={emp.id} className="grid-cell grid-cell-shift">
+              ))}
+            </div>
+            {/* Sağ: personel sütunları */}
+            <div className="shift-grid-body" style={{ ['--emp-count' as string]: Math.max(employees.length, 1) }}>
+              {employees.map((emp) => (
+                <div key={emp.id} className="grid-cell header-cell">
+                  <div style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.05em' }}>{emp.name}</div>
+                  <div className="mono" style={{ fontSize: '8px', opacity: 0.5 }}>{emp.role}</div>
+                </div>
+              ))}
+              {weekDays.map((day) =>
+                employees.map((emp) => (
+                  <div key={`${emp.id}-${day.toString()}`} className="grid-cell grid-cell-shift">
                     {getShiftsForDay(emp.id, day).map((shift) => (
                       <ShiftCard key={shift.id} shift={shift} />
                     ))}
                   </div>
-                ))}
-              </React.Fragment>
-            ))}
+                ))
+              )}
+            </div>
           </div>
         </div>
       </main>
