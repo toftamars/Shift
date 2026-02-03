@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -6,16 +6,10 @@ import { tr } from 'date-fns/locale';
 interface HeaderProps {
     startDate: Date;
     endDate: Date;
+    onAddShift?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ startDate }) => {
-    const [addHint, setAddHint] = useState(false);
-
-    const handleAddClick = () => {
-        setAddHint(true);
-        setTimeout(() => setAddHint(false), 3000);
-    };
-
+export const Header: React.FC<HeaderProps> = ({ startDate, onAddShift }) => {
     return (
         <header>
             <div>
@@ -32,16 +26,11 @@ export const Header: React.FC<HeaderProps> = ({ startDate }) => {
                         {format(startDate, 'LLLL yyyy', { locale: tr })}
                     </div>
                 </div>
-                {addHint && (
-                    <span role="status" aria-live="polite" style={{ fontSize: '0.875rem', color: 'var(--text-dim)' }}>
-                        Vardiya ekleme yakında
-                    </span>
-                )}
                 <button
                     type="button"
                     className="btn-premium"
                     aria-label="Vardiya ekle"
-                    onClick={handleAddClick}
+                    onClick={onAddShift}
                 >
                     Ekle <Plus size={18} aria-hidden="true" />
                 </button>

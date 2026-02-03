@@ -5,6 +5,7 @@ import { employeesApi, shiftsApi } from '../services/api';
 import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
 import { ShiftCard } from '../components/ShiftCard';
+import { AddShiftModal } from '../components/AddShiftModal';
 import type { Employee, Shift } from '../types';
 
 /** Skill: js-set-map-lookups — Map for O(1) shift lookup by employee+day */
@@ -27,6 +28,7 @@ function PlannerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   const weekStart = useMemo(() => startOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
   const weekEnd = useMemo(() => endOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
@@ -103,7 +105,13 @@ function PlannerPage() {
       <Sidebar />
       <main id="main-content" className="main-stage" tabIndex={-1}>
         <div className="bg-glow" style={{ top: '-100px', left: '-100px' }} />
-        <Header startDate={weekStart} endDate={weekEnd} />
+        <Header startDate={weekStart} endDate={weekEnd} onAddShift={() => setAddModalOpen(true)} />
+        <AddShiftModal
+          open={addModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          onSuccess={() => setRetryKey((k) => k + 1)}
+          defaultDate={weekStart}
+        />
         {error ? (
           <div
             role="alert"

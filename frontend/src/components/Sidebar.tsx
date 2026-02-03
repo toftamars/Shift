@@ -11,14 +11,10 @@ export const Sidebar: React.FC = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const [hint, setHint] = useState<string | null>(null);
-
     const isPlanner = location.pathname === '/';
-
-    const showHint = (msg: string) => {
-        setHint(msg);
-        setTimeout(() => setHint(null), 2500);
-    };
+    const isPersonel = location.pathname === '/personel';
+    const isVardiyaTurleri = location.pathname === '/vardiya-turleri';
+    const isAyarlar = location.pathname === '/ayarlar';
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -28,66 +24,55 @@ export const Sidebar: React.FC = () => {
 
     return (
         <nav className="sidebar" aria-label="Ana menü">
-            <div className="logo" aria-hidden="true">
-                <Command size={24} />
-            </div>
+            <button
+                type="button"
+                className="logo sidebar-icon"
+                aria-label="Ana sayfa"
+                style={btnStyle}
+                onClick={() => navigate('/')}
+            >
+                <Command size={24} aria-hidden="true" />
+            </button>
             <button
                 type="button"
                 className={`sidebar-icon ${isPlanner ? 'active' : ''}`}
                 aria-label="Planlama"
                 style={btnStyle}
-                onClick={() => navigate('/')}
+                onClick={() => {
+                    if (isPlanner) {
+                        document.querySelector('.content-grid-wrapper')?.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                        navigate('/');
+                    }
+                }}
             >
                 <LayoutGrid size={24} aria-hidden="true" />
             </button>
             <button
                 type="button"
-                className="sidebar-icon"
+                className={`sidebar-icon ${isPersonel ? 'active' : ''}`}
                 aria-label="Personel"
                 style={btnStyle}
-                onClick={() => showHint('Personel yakında')}
+                onClick={() => navigate('/personel')}
             >
                 <Users size={24} aria-hidden="true" />
             </button>
             <button
                 type="button"
-                className="sidebar-icon"
+                className={`sidebar-icon ${isVardiyaTurleri ? 'active' : ''}`}
                 aria-label="Vardiya türleri"
                 style={btnStyle}
-                onClick={() => showHint('Vardiya türleri yakında')}
+                onClick={() => navigate('/vardiya-turleri')}
             >
                 <Zap size={24} aria-hidden="true" />
             </button>
-            <div style={{ marginTop: 'auto', position: 'relative' }}>
-                {hint && (
-                    <div
-                        role="status"
-                        aria-live="polite"
-                        style={{
-                            position: 'absolute',
-                            left: '100%',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            marginLeft: 12,
-                            padding: '6px 10px',
-                            background: 'var(--panel)',
-                            border: '1px solid var(--border)',
-                            borderRadius: 8,
-                            fontSize: '0.75rem',
-                            whiteSpace: 'nowrap',
-                            color: 'var(--text-dim)',
-                            zIndex: 100,
-                        }}
-                    >
-                        {hint}
-                    </div>
-                )}
+            <div style={{ marginTop: 'auto' }}>
                 <button
                     type="button"
-                    className="sidebar-icon"
+                    className={`sidebar-icon ${isAyarlar ? 'active' : ''}`}
                     aria-label="Ayarlar"
                     style={btnStyle}
-                    onClick={() => showHint('Ayarlar yakında')}
+                    onClick={() => navigate('/ayarlar')}
                 >
                     <Settings size={24} aria-hidden="true" />
                 </button>

@@ -55,4 +55,33 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/', async (req: Request, res: Response) => {
+  try {
+    const { employee_id: employeeId, shift_type_id: shiftTypeId, shift_date: shiftDate, start_time: startTime, end_time: endTime } = req.body;
+    if (!employeeId || !shiftTypeId || !shiftDate || !startTime || !endTime) {
+      return res.status(400).json({ error: 'employee_id, shift_type_id, shift_date, start_time, end_time gerekli' });
+    }
+    const result = await query(
+      `INSERT INTO shifts (schedule_id, employee_id, shift_type_id, shift_date, start_time, end_time)
+       VALUES (NULL, $1, $2, $3, $4, $5)
+       RETURNING id, employee_id, shift_type_id, shift_date, start_time, end_time, status`,
+      [employeeId, shiftTypeId, shiftDate, startTime, endTime]
+    );
+    const row = result.rows[0];
+    const out = {
+      ...row,
+      start_time: row.start_time?.toString?.()?.slice(0, 5) ?? row.start_time,
+      end_time: row.end_time?.toString?.()?.slice(0, 5) ?? row.end_time,
+    };
+    return res.status(201).json(out);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('unique') || msg.includes('duplicate')) {
+      return res.status(409).json({ error: 'Bu personel için aynı tarih/saatte vardiya zaten var' });
+    }
+    console.error(err);
+    return res.status(500).json({ error: 'Vardiya eklenemedi' });
+  }
+});
+
 export default router;

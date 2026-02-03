@@ -66,6 +66,8 @@ export const shiftsApi = {
     }>>('/shifts', { params: { from_date: fromDate, to_date: toDate } }),
   listBySchedule: (scheduleId: string) =>
     api.get('/shifts', { params: { schedule_id: scheduleId } }),
+  create: (body: { employee_id: string; shift_type_id: string; shift_date: string; start_time: string; end_time: string }) =>
+    api.post<{ id: string; employee_id: string; shift_type_id: string; shift_date: string; start_time: string; end_time: string }>('/shifts', body),
 };
 
 export const schedulesApi = {
