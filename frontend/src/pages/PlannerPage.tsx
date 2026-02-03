@@ -1,11 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { format, startOfWeek, endOfWeek, addDays, isSameDay } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { employeesApi, shiftsApi } from '../services/api';
+import { X } from 'lucide-react';
+import { employeesApi, shiftsApi, shiftTypesApi, getErrorMessage } from '../services/api';
 import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
 import { ShiftCard } from '../components/ShiftCard';
 import type { Employee, Shift } from '../types';
+
+interface ShiftTypeOption {
+  id: string;
+  name: string;
+  start_time: string;
+  end_time: string;
+}
 
 /** Skill: js-set-map-lookups — Map for O(1) shift lookup by employee+day */
 function buildShiftsByKey(shifts: Shift[], weekDays: Date[], employeeIds: string[]): Map<string, Shift[]> {
@@ -27,6 +35,12 @@ function PlannerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryKey, setRetryKey] = useState(0);
+  const [assignCell, setAssignCell] = useState<{ employeeId: string; day: Date } | null>(null);
+  const [shiftTypes, setShiftTypes] = useState<ShiftTypeOption[]>([]);
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [assignSubmitLoading, setAssignSubmitLoading] = useState(false);
+  const [assignError, setAssignError] = useState<string | null>(null);
+  const [selectedShiftTypeId, setSelectedShiftTypeId] = useState<string>('');
 
   const weekStart = useMemo(() => startOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
   const weekEnd = useMemo(() => endOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
@@ -88,6 +102,54 @@ function PlannerPage() {
       cancelled = true;
     };
   }, [weekStart, weekEnd, retryKey]);
+
+  useEffect(() => {
+    if (!assignCell) return;
+    setAssignError(null);
+    setSelectedShiftTypeId('');
+    setAssignLoading(true);
+    shiftTypesApi
+      .list()
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        const types = data.map((t: { id: string; name: string; start_time: string; end_time: string }) => ({
+          id: t.id,
+          name: t.name,
+          start_time: typeof t.start_time === 'string' ? t.start_time.slice(0, 5) : '08:00',
+          end_time: typeof t.end_time === 'string' ? t.end_time.slice(0, 5) : '16:00',
+        }));
+        setShiftTypes(types);
+        if (types.length > 0) setSelectedShiftTypeId(types[0].id);
+      })
+      .catch((err) => setAssignError(getErrorMessage(err, 'Vardiya türleri yüklenemedi')))
+      .finally(() => setAssignLoading(false));
+  }, [assignCell]);
+
+  const openAssignModal = (employeeId: string, day: Date) => {
+    setAssignCell({ employeeId, day });
+  };
+
+  const handleAssignSubmit = () => {
+    if (!assignCell || !selectedShiftTypeId) return;
+    const st = shiftTypes.find((t) => t.id === selectedShiftTypeId);
+    if (!st) return;
+    setAssignError(null);
+    setAssignSubmitLoading(true);
+    shiftsApi
+      .create({
+        employee_id: assignCell.employeeId,
+        shift_type_id: selectedShiftTypeId,
+        shift_date: format(assignCell.day, 'yyyy-MM-dd'),
+        start_time: st.start_time,
+        end_time: st.end_time,
+      })
+      .then(() => {
+        setAssignCell(null);
+        setRetryKey((k) => k + 1);
+      })
+      .catch((err) => setAssignError(getErrorMessage(err, 'Vardiya atanamadı')))
+      .finally(() => setAssignSubmitLoading(false));
+  };
 
   if (loading && employees.length === 0) {
     return (
@@ -153,7 +215,16 @@ function PlannerPage() {
               ))}
               {weekDays.map((day) =>
                 employees.map((emp) => (
-                  <div key={`${emp.id}-${day.toString()}`} className="grid-cell grid-cell-shift">
+                  <div
+                    key={`${emp.id}-${day.toString()}`}
+                    className="grid-cell grid-cell-shift"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => openAssignModal(String(emp.id), day)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openAssignModal(String(emp.id), day); } }}
+                    aria-label={`${emp.name}, ${format(day, 'd MMMM')} – vardiya ata`}
+                    style={{ cursor: 'pointer', minHeight: 100 }}
+                  >
                     {getShiftsForDay(emp.id, day).map((shift) => (
                       <ShiftCard key={shift.id} shift={shift} />
                     ))}
@@ -165,6 +236,41 @@ function PlannerPage() {
             </div>
           </div>
         </div>
+
+        {assignCell && (
+          <div role="dialog" aria-modal="true" aria-labelledby="assign-shift-title" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setAssignCell(null)}>
+            <div style={{ background: 'var(--panel)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, minWidth: 320, maxWidth: '90vw' }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <h2 id="assign-shift-title" className="studio-title" style={{ margin: 0, fontSize: '1rem' }}>VARDİYA ATA</h2>
+                <button type="button" aria-label="Kapat" onClick={() => setAssignCell(null)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: 4 }}><X size={20} /></button>
+              </div>
+              <p style={{ margin: '0 0 12px', fontSize: '0.875rem', color: 'var(--text-dim)' }}>{format(assignCell.day, 'd MMMM yyyy', { locale: tr })}</p>
+              {assignError && <div role="alert" style={{ padding: 10, marginBottom: 12, background: 'rgba(239,68,68,0.2)', color: '#fca5a5', borderRadius: 8, fontSize: '0.875rem' }}>{assignError}</div>}
+              {assignLoading ? (
+                <p style={{ color: 'var(--text-dim)' }}>Vardiya türleri yükleniyor…</p>
+              ) : (
+                <>
+                  <label htmlFor="assign-shift-type" style={{ display: 'block', marginBottom: 6, fontSize: '0.875rem', color: 'var(--text-dim)' }}>Vardiya türü seçin</label>
+                  <select
+                    id="assign-shift-type"
+                    value={selectedShiftTypeId}
+                    onChange={(e) => setSelectedShiftTypeId(e.target.value)}
+                    style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'inherit', marginBottom: 16 }}
+                  >
+                    {shiftTypes.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name} ({t.start_time} – {t.end_time})</option>
+                    ))}
+                  </select>
+                  {shiftTypes.length === 0 && <p style={{ margin: '0 0 16px', fontSize: '0.8rem', color: 'var(--text-dim)' }}>Önce Vardiya Türleri sayfasından vardiya türü oluşturun.</p>}
+                  <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+                    <button type="button" onClick={() => setAssignCell(null)} style={{ padding: '10px 18px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', cursor: 'pointer' }}>İptal</button>
+                    <button type="button" className="btn-premium" disabled={assignSubmitLoading || shiftTypes.length === 0} onClick={handleAssignSubmit} style={{ padding: '10px 18px' }}>{assignSubmitLoading ? 'Atanıyor…' : 'Kaydet'}</button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
