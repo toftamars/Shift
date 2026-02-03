@@ -53,7 +53,22 @@ export function PersonelPage() {
             </div>
           )}
           {!loading && list.length === 0 && !error && (
-            <p style={{ color: 'var(--text-dim)' }}>Henüz personel kaydı yok.</p>
+            <div
+              role="status"
+              style={{
+                padding: 32,
+                textAlign: 'center',
+                background: 'var(--panel)',
+                borderRadius: 12,
+                border: '1px dashed var(--border)',
+                color: 'var(--text-dim)',
+              }}
+            >
+              <p style={{ margin: 0, fontSize: '1rem' }}>Henüz personel kaydı yok.</p>
+              <p style={{ margin: '8px 0 0', fontSize: '0.875rem', opacity: 0.8 }}>
+                Çalışanlar Supabase Auth ile eklendikten sonra burada listelenir.
+              </p>
+            </div>
           )}
           {list.length > 0 && (
             <div style={{ overflow: 'auto' }}>
