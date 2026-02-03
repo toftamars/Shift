@@ -6,7 +6,9 @@ import { AuthInit } from './components/AuthInit';
 
 function App() {
   return (
-    <AuthInit>
+    <div style={{ position: 'relative', width: '100%', height: '100%', pointerEvents: 'auto' }}>
+      <div className="grain-overlay" aria-hidden="true" />
+      <AuthInit>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route
@@ -20,6 +22,7 @@ function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
     </AuthInit>
+    </div>
   );
 }
 
