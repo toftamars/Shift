@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Plus, X } from 'lucide-react';
-import { departmentsApi } from '../services/api';
+import { departmentsApi, getErrorMessage } from '../services/api';
 import { Sidebar } from '../components/Sidebar';
 
 interface DepartmentRow {
@@ -46,7 +46,7 @@ export function DepartmanlarPage() {
         const data = Array.isArray(res.data) ? res.data : [];
         setList(data);
       })
-      .catch((err) => setError(err.response?.data?.error ?? 'Liste yüklenemedi'))
+      .catch((err) => setError(getErrorMessage(err, 'Liste yüklenemedi')))
       .finally(() => setLoading(false));
   };
 
@@ -75,7 +75,7 @@ export function DepartmanlarPage() {
         setModalOpen(false);
         fetchList();
       })
-      .catch((err) => setFormError(err.response?.data?.error ?? 'Eklenemedi'))
+      .catch((err) => setFormError(getErrorMessage(err, 'Departman eklenemedi')))
       .finally(() => setSubmitLoading(false));
   };
 

@@ -10,6 +10,28 @@ const getApiBaseUrl = (): string => {
 };
 const API_URL = getApiBaseUrl();
 
+/** Axios hatasından kullanıcıya gösterilecek mesajı çıkarır */
+export function getErrorMessage(err: unknown, fallback = 'İşlem başarısız'): string {
+  if (err && typeof err === 'object' && 'response' in err) {
+    const res = (err as { response?: { data?: unknown; status?: number } }).response;
+    if (res?.data && typeof res.data === 'object' && res.data !== null && 'error' in res.data && typeof (res.data as { error: unknown }).error === 'string') {
+      return (res.data as { error: string }).error;
+    }
+    if (typeof res?.data === 'string') return res.data;
+    if (res?.status === 404) return 'Kaynak bulunamadı';
+    if (res?.status === 503) return 'Veritabanı bağlantısı yok. Backend .env içinde DATABASE_URL kontrol edin.';
+    if (res?.status === 500) return 'Sunucu hatası. Backend ve veritabanı çalışıyor mu?';
+    if (res?.status && res.status >= 400) return `Hata (${res.status})`;
+  }
+  if (err instanceof Error && err.message) {
+    if (err.message === 'Network Error' || (err as { code?: string }).code === 'ERR_NETWORK') {
+      return 'API\'ye ulaşılamadı. Backend çalışıyor mu? (örn. npm run dev)';
+    }
+    return err.message;
+  }
+  return fallback;
+}
+
 export const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },

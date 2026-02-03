@@ -30,8 +30,12 @@ router.post('/', async (req: Request, res: Response) => {
       [name.trim(), description && typeof description === 'string' ? description.trim() : null]
     );
     return res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
+  } catch (err: unknown) {
+    console.error('POST /departments error:', err);
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('ECONNREFUSED') || msg.includes('connect')) {
+      return res.status(503).json({ error: 'Veritabanı bağlantısı yok. Backend .env içinde DATABASE_URL kontrol edin.' });
+    }
     return res.status(500).json({ error: 'Departman eklenemedi' });
   }
 });
