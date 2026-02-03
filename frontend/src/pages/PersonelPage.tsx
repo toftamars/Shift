@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
-import { employeesApi } from '../services/api';
+import { Plus, Trash2 } from 'lucide-react';
+import { employeesApi, getErrorMessage } from '../services/api';
 import { Sidebar } from '../components/Sidebar';
 import { AddEmployeeModal } from '../components/AddEmployeeModal';
 
@@ -17,6 +17,7 @@ export function PersonelPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchList = () => {
     setLoading(true);
@@ -27,13 +28,23 @@ export function PersonelPage() {
         const data = Array.isArray(res.data) ? res.data : [];
         setList(data);
       })
-      .catch((err) => setError(err.response?.data?.error ?? 'Liste yüklenemedi'))
+      .catch((err) => setError(getErrorMessage(err, 'Liste yüklenemedi')))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     fetchList();
   }, []);
+
+  const handleDelete = (id: string, name: string) => {
+    if (!window.confirm(`"${name}" kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`)) return;
+    setDeletingId(id);
+    employeesApi
+      .delete(id)
+      .then(() => fetchList())
+      .catch((err) => setError(getErrorMessage(err, 'Personel silinemedi')))
+      .finally(() => setDeletingId(null));
+  };
 
   return (
     <div className="app-container">
@@ -70,7 +81,7 @@ export function PersonelPage() {
             >
               <p style={{ margin: 0, fontSize: '1rem' }}>Henüz personel kaydı yok.</p>
               <p style={{ margin: '8px 0 0', fontSize: '0.875rem', opacity: 0.8 }}>
-                Önce Supabase Auth → Users ile kullanıcı ekleyin, sonra &quot;Ekle&quot; ile çalışan kaydı oluşturun.
+                &quot;Ekle&quot; ile doğrudan sayfadan çalışan ekleyebilirsiniz.
               </p>
             </div>
           )}
@@ -82,6 +93,7 @@ export function PersonelPage() {
                     <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Sicil</th>
                     <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Ad Soyad</th>
                     <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Departman</th>
+                    <th style={{ padding: 12, width: 56, borderBottom: '1px solid var(--border)' }} aria-label="İşlemler" />
                   </tr>
                 </thead>
                 <tbody>
@@ -90,6 +102,17 @@ export function PersonelPage() {
                       <td style={{ padding: 12 }} className="mono">{e.employee_code}</td>
                       <td style={{ padding: 12 }}>{e.name || '—'}</td>
                       <td style={{ padding: 12 }}>{e.department_name ?? e.department_id ?? '—'}</td>
+                      <td style={{ padding: 8 }}>
+                        <button
+                          type="button"
+                          aria-label={`${e.name || e.employee_code} kaydını sil`}
+                          onClick={() => handleDelete(e.id, e.name || e.employee_code)}
+                          disabled={deletingId === e.id}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: deletingId === e.id ? 'wait' : 'pointer', padding: 6 }}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
