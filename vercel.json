@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "projectId": "prj_C3IJ5WierwQDaDuBT1g5KQfjPmxV",
   "framework": "nextjs",
   "buildCommand": "cd frontend && npm run build",
   "devCommand": "cd frontend && npm run dev",
