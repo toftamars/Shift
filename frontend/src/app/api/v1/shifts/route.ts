@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
         if (fromDate && toDate) {
             const result = await query(
-                `SELECT s.id, s.employee_id, s.shift_type_id, s.shift_date, s.start_time, s.end_time, s.is_published,
+                `SELECT s.id, s.employee_id, s.shift_type_id, s.shift_date, s.start_time, s.end_time,
                 u.full_name as employee_name, st.name as shift_type_name, st.color_code
          FROM shifts s
          JOIN employees e ON s.employee_id = e.id
