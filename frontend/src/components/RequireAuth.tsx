@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/store';
@@ -13,12 +13,22 @@ export function RequireAuth({ children }: RequireAuthProps) {
   const token = useSelector((state: RootState) => state.auth.token);
   const router = useRouter();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!token) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !token) {
       router.push('/login');
     }
-  }, [token, router, pathname]);
+  }, [mounted, token, router, pathname]);
+
+  // Prevent hydration mismatch by returning null until mounted on client
+  if (!mounted) {
+    return null;
+  }
 
   if (!token) {
     return null;
