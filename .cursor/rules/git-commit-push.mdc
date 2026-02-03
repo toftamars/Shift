@@ -1,0 +1,18 @@
+---
+description: Kod değişikliklerinden sonra commit ve push yapılması
+alwaysApply: true
+---
+
+# Git: Commit ve Push
+
+Kod değişikliği yaptıktan ve görevi tamamladıktan sonra **asla unutma**:
+
+1. **Commit:** Tüm değişiklikleri stage edip anlamlı bir commit mesajı ile commit et.
+2. **Push:** `git push` ile remote’a gönder.
+
+Örnek:
+```bash
+git add -A && git commit -m "feat: kısa açıklama" && git push
+```
+
+Kullanıcı "push and commit" veya "commit et" dese de demese de, görev bittiğinde ve dosyalarda değişiklik varsa commit + push yap.
