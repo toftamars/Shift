@@ -21,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
-      <body>
+    <html lang="tr" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <Providers>
           <div style={{ position: 'relative', width: '100%', height: '100%', pointerEvents: 'auto' }}>
             <div className="grain-overlay" aria-hidden="true" />
