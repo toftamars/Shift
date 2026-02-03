@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './pages/Login';
 import PlannerPage from './pages/PlannerPage';
 import { PersonelPage } from './pages/PersonelPage';
+import { DepartmanlarPage } from './pages/DepartmanlarPage';
 import { VardiyaTurleriPage } from './pages/VardiyaTurleriPage';
 import { AyarlarPage } from './pages/AyarlarPage';
 import { RequireAuth } from './components/RequireAuth';
@@ -16,6 +17,7 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<RequireAuth><PlannerPage /></RequireAuth>} />
       <Route path="/personel" element={<RequireAuth><PersonelPage /></RequireAuth>} />
+      <Route path="/departmanlar" element={<RequireAuth><DepartmanlarPage /></RequireAuth>} />
       <Route path="/vardiya-turleri" element={<RequireAuth><VardiyaTurleriPage /></RequireAuth>} />
       <Route path="/ayarlar" element={<RequireAuth><AyarlarPage /></RequireAuth>} />
       <Route path="*" element={<Navigate to="/" replace />} />

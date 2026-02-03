@@ -18,6 +18,24 @@ router.get('/', async (_req: Request, res: Response) => {
   }
 });
 
+router.post('/', async (req: Request, res: Response) => {
+  try {
+    const { name, description } = req.body;
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      return res.status(400).json({ error: 'Departman adı gerekli' });
+    }
+    const result = await query(
+      `INSERT INTO departments (name, description) VALUES ($1, $2)
+       RETURNING id, name, description, manager_id, is_active, created_at`,
+      [name.trim(), description && typeof description === 'string' ? description.trim() : null]
+    );
+    return res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Departman eklenemedi' });
+  }
+});
+
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

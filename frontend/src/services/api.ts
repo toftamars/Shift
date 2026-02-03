@@ -40,14 +40,20 @@ api.interceptors.response.use(
 
 export const employeesApi = {
   list: (departmentId?: string) =>
-    api.get<Array<{ id: string; name: string; employee_code: string; department_id: string | null }>>(
+    api.get<Array<{ id: string; name: string; employee_code: string; department_id: string | null; department_name?: string | null }>>(
       '/employees' + (departmentId ? `?department_id=${departmentId}` : '')
     ),
   get: (id: string) => api.get(`/employees/${id}`),
+  availableUsers: () =>
+    api.get<Array<{ id: string; name: string; email: string }>>('/employees/available-users'),
+  create: (body: { user_id: string; department_id?: string | null; employee_code: string; hire_date: string }) =>
+    api.post<{ id: string }>('/employees', body),
 };
 
 export const departmentsApi = {
   list: () => api.get<Array<{ id: string; name: string; description: string | null }>>('/departments'),
+  create: (body: { name: string; description?: string | null }) =>
+    api.post<{ id: string; name: string; description: string | null }>('/departments', body),
 };
 
 export const shiftTypesApi = {

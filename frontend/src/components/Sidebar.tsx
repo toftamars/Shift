@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Command, LayoutGrid, Users, Zap, Settings, LogOut } from 'lucide-react';
+import { Command, LayoutGrid, Users, Building2, Zap, Settings, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { logout } from '../store/authSlice';
 
@@ -13,6 +13,7 @@ export const Sidebar: React.FC = () => {
     const location = useLocation();
     const isPlanner = location.pathname === '/';
     const isPersonel = location.pathname === '/personel';
+    const isDepartmanlar = location.pathname === '/departmanlar';
     const isVardiyaTurleri = location.pathname === '/vardiya-turleri';
     const isAyarlar = location.pathname === '/ayarlar';
 
@@ -56,6 +57,15 @@ export const Sidebar: React.FC = () => {
                 onClick={() => navigate('/personel')}
             >
                 <Users size={24} aria-hidden="true" />
+            </button>
+            <button
+                type="button"
+                className={`sidebar-icon ${isDepartmanlar ? 'active' : ''}`}
+                aria-label="Departmanlar"
+                style={btnStyle}
+                onClick={() => navigate('/departmanlar')}
+            >
+                <Building2 size={24} aria-hidden="true" />
             </button>
             <button
                 type="button"

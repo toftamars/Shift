@@ -1,37 +1,38 @@
 import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
 import { employeesApi } from '../services/api';
 import { Sidebar } from '../components/Sidebar';
+import { AddEmployeeModal } from '../components/AddEmployeeModal';
 
 interface EmployeeRow {
   id: string;
   name: string;
   employee_code: string;
   department_id: string | null;
+  department_name?: string | null;
 }
 
 export function PersonelPage() {
   const [list, setList] = useState<EmployeeRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
+  const fetchList = () => {
     setLoading(true);
     setError(null);
     employeesApi
       .list()
       .then((res) => {
-        if (cancelled) return;
         const data = Array.isArray(res.data) ? res.data : [];
         setList(data);
       })
-      .catch((err) => {
-        if (!cancelled) setError(err.response?.data?.error ?? 'Liste yüklenemedi');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
+      .catch((err) => setError(err.response?.data?.error ?? 'Liste yüklenemedi'))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchList();
   }, []);
 
   return (
@@ -39,11 +40,14 @@ export function PersonelPage() {
       <a href="#main-content" className="skip-link">İçeriğe atla</a>
       <Sidebar />
       <main id="main-content" className="main-stage" tabIndex={-1}>
-        <header>
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div className="mono" style={{ marginBottom: '8px' }}>Personel</div>
             <h1 className="studio-title">ÇALIŞAN <span>LİSTESİ</span></h1>
           </div>
+          <button type="button" className="btn-premium" onClick={() => setAddModalOpen(true)} aria-label="Çalışan ekle">
+            <Plus size={18} aria-hidden="true" /> Ekle
+          </button>
         </header>
         <div className="content-grid-wrapper" style={{ padding: '40px 60px' }}>
           {loading && list.length === 0 && <p style={{ color: 'var(--text-dim)' }}>Yükleniyor…</p>}
@@ -66,9 +70,7 @@ export function PersonelPage() {
             >
               <p style={{ margin: 0, fontSize: '1rem' }}>Henüz personel kaydı yok.</p>
               <p style={{ margin: '8px 0 0', fontSize: '0.875rem', opacity: 0.8 }}>
-                1) Supabase Dashboard → Authentication → Users → kullanıcı ekle.
-                <br />
-                2) SQL Editor ile <code style={{ fontSize: '0.8em' }}>employees</code> tablosuna <code style={{ fontSize: '0.8em' }}>user_id</code> + sicil no ekle. Detay: <code style={{ fontSize: '0.8em' }}>docs/CALISAN_EKLEME.md</code>
+                Önce Supabase Auth → Users ile kullanıcı ekleyin, sonra &quot;Ekle&quot; ile çalışan kaydı oluşturun.
               </p>
             </div>
           )}
@@ -87,7 +89,7 @@ export function PersonelPage() {
                     <tr key={e.id} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: 12 }} className="mono">{e.employee_code}</td>
                       <td style={{ padding: 12 }}>{e.name || '—'}</td>
-                      <td style={{ padding: 12 }}>{e.department_id ?? '—'}</td>
+                      <td style={{ padding: 12 }}>{e.department_name ?? e.department_id ?? '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -96,6 +98,7 @@ export function PersonelPage() {
           )}
         </div>
       </main>
+      <AddEmployeeModal open={addModalOpen} onClose={() => setAddModalOpen(false)} onSuccess={fetchList} />
     </div>
   );
 }
