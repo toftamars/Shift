@@ -59,10 +59,10 @@ function PlannerPage() {
         if (cancelled) return;
         const empData = Array.isArray(empRes.data) ? empRes.data : [];
         const shiftData = Array.isArray(shiftsRes.data) ? shiftsRes.data : [];
-        const empList = empData.map((e: { id: string; name?: string; employee_code: string; department_id?: string | null }) => ({
+        const empList = empData.map((e: { id: string; name?: string; employee_code: string; department_id?: string | null; department_name?: string | null }) => ({
           id: e.id,
           name: e.name || e.employee_code || '—',
-          role: e.department_id || 'Personel',
+          role: e.department_name || '—',
         }));
         const shiftList: Shift[] = shiftData.map((s: { id: string; employee_id: string; shift_date: string; start_time: string; end_time: string }) => ({
           id: s.id,
@@ -137,12 +137,18 @@ function PlannerPage() {
                 </div>
               ))}
             </div>
-            {/* Sağ: personel sütunları */}
+            {/* Sağ: personel ve departman isimleri yatay sütunlarda */}
             <div className="shift-grid-body" style={{ ['--emp-count' as string]: Math.max(employees.length, 1) }}>
+              {employees.length === 0 ? (
+                <div className="grid-cell header-cell" style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 120, color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+                  Personel ekleyin. Personel sayfasından çalışan oluşturduğunuzda burada yatay sütun olarak görünecek.
+                </div>
+              ) : (
+                <>
               {employees.map((emp) => (
                 <div key={emp.id} className="grid-cell header-cell">
                   <div style={{ fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.05em' }}>{emp.name}</div>
-                  <div className="mono" style={{ fontSize: '8px', opacity: 0.5 }}>{emp.role}</div>
+                  <div className="mono" style={{ fontSize: '0.7rem', opacity: 0.7 }}>{emp.role}</div>
                 </div>
               ))}
               {weekDays.map((day) =>
@@ -153,6 +159,8 @@ function PlannerPage() {
                     ))}
                   </div>
                 ))
+              )}
+                </>
               )}
             </div>
           </div>
