@@ -12,6 +12,8 @@ export interface Shift {
     startTime: string;
     endTime: string;
     type?: string;
+    name?: string;
+    color_code?: string;
 }
 
 export interface ShiftPlannerState {

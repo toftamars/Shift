@@ -6,9 +6,10 @@ import { tr } from 'date-fns/locale';
 interface HeaderProps {
     startDate: Date;
     endDate: Date;
+    children?: React.ReactNode;
 }
 
-export const Header: React.FC<HeaderProps> = ({ startDate }) => {
+export const Header: React.FC<HeaderProps> = ({ startDate, children }) => {
     return (
         <header>
             <div>
@@ -19,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ startDate }) => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+                {children}
                 <div style={{ textAlign: 'right' }}>
                     <div className="mono">Dikey Matris</div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 300 }}>

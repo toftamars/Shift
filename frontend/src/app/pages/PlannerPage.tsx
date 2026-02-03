@@ -40,6 +40,7 @@ function PlannerPage() {
   const [shiftTypes, setShiftTypes] = useState<ShiftTypeOption[]>([]);
   const [assignLoading, setAssignLoading] = useState(false);
   const [assignSubmitLoading, setAssignSubmitLoading] = useState(false);
+  const [autoGenerating, setAutoGenerating] = useState(false);
   const [assignError, setAssignError] = useState<string | null>(null);
   const [selectedShiftTypeId, setSelectedShiftTypeId] = useState<string>('');
 
@@ -84,12 +85,22 @@ function PlannerPage() {
           name: e.name || '—',
           role: e.department_name || '—',
         }));
-        const shiftList: Shift[] = shiftData.map((s: { id: string; employee_id: string; shift_date: string; start_time: string; end_time: string }) => ({
+        const shiftList: Shift[] = shiftData.map((s: {
+          id: string;
+          employee_id: string;
+          shift_date: string;
+          start_time: string;
+          end_time: string;
+          shift_type_name?: string;
+          color_code?: string;
+        }) => ({
           id: s.id,
           employeeId: s.employee_id,
           day: new Date(s.shift_date),
           startTime: typeof s.start_time === 'string' ? s.start_time.slice(0, 5) : '00:00',
           endTime: typeof s.end_time === 'string' ? s.end_time.slice(0, 5) : '00:00',
+          name: s.shift_type_name,
+          color_code: s.color_code
         }));
         setEmployees(empList);
         setShifts(shiftList);
@@ -108,6 +119,26 @@ function PlannerPage() {
       cancelled = true;
     };
   }, [weekStart, weekEnd, retryKey]);
+
+  const handleAutoSchedule = () => {
+    if (!currentDate) return;
+    if (!window.confirm('Bu haftanın mevcut tüm vardiyaları silinecek ve kurallara göre yeniden oluşturulacak. Emin misiniz?')) return;
+
+    setAutoGenerating(true);
+    setError(null);
+    const dateStr = format(weekStart, 'yyyy-MM-dd');
+
+    shiftsApi.autoSchedule(dateStr)
+      .then(() => {
+        setRetryKey(k => k + 1);
+      })
+      .catch(err => {
+        setError(getErrorMessage(err, 'Otomatik planlama başarısız oldu'));
+      })
+      .finally(() => {
+        setAutoGenerating(false);
+      });
+  };
 
   useEffect(() => {
     if (!assignCell) return;
@@ -175,7 +206,24 @@ function PlannerPage() {
       <Sidebar />
       <main id="main-content" className="main-stage" tabIndex={-1}>
         <div className="bg-glow" style={{ top: '-100px', left: '-100px' }} />
-        <Header startDate={weekStart} endDate={weekEnd} />
+        <Header startDate={weekStart} endDate={weekEnd}>
+          <button
+            type="button"
+            className="btn-premium"
+            disabled={autoGenerating}
+            onClick={handleAutoSchedule}
+            style={{
+              padding: '10px 20px',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {autoGenerating ? 'Oluşturuluyor...' : 'Vardiya Oluştur'}
+          </button>
+        </Header>
         {error ? (
           <div
             role="alert"
