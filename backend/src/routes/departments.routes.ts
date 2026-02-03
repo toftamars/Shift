@@ -40,6 +40,42 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+router.put('/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, description } = req.body;
+    if (!name || typeof name !== 'string' || name.trim() === '') {
+      return res.status(400).json({ error: 'Departman adı gerekli' });
+    }
+    const result = await query(
+      `UPDATE departments SET name = $1, description = $2, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $3 RETURNING id, name, description, manager_id, is_active, created_at`,
+      [name.trim(), description && typeof description === 'string' ? description.trim() : null, id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Departman bulunamadı' });
+    }
+    return res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Departman güncellenemedi' });
+  }
+});
+
+router.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await query('DELETE FROM departments WHERE id = $1 RETURNING id', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Departman bulunamadı' });
+    }
+    return res.status(204).send();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Departman silinemedi' });
+  }
+});
+
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

@@ -75,10 +75,18 @@ export const departmentsApi = {
   list: () => api.get<Array<{ id: string; name: string; description: string | null }>>('/departments'),
   create: (body: { name: string; description?: string | null }) =>
     api.post<{ id: string; name: string; description: string | null }>('/departments', body),
+  update: (id: string, body: { name: string; description?: string | null }) =>
+    api.put<{ id: string; name: string; description: string | null }>(`/departments/${id}`, body),
+  delete: (id: string) => api.delete(`/departments/${id}`),
 };
 
 export const shiftTypesApi = {
   list: () => api.get<Array<{ id: string; name: string; start_time: string; end_time: string; color_code: string | null }>>('/shift-types'),
+  create: (body: { name: string; start_time: string; end_time: string; color_code?: string | null }) =>
+    api.post<{ id: string; name: string; start_time: string; end_time: string; color_code: string | null }>('/shift-types', body),
+  update: (id: string, body: { name: string; start_time: string; end_time: string; color_code?: string | null }) =>
+    api.put<{ id: string; name: string; start_time: string; end_time: string; color_code: string | null }>(`/shift-types/${id}`, body),
+  delete: (id: string) => api.delete(`/shift-types/${id}`),
 };
 
 export const shiftsApi = {

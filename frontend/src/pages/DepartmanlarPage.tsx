@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Pencil, Trash2 } from 'lucide-react';
 import { departmentsApi, getErrorMessage } from '../services/api';
 import { Sidebar } from '../components/Sidebar';
 
@@ -33,8 +33,10 @@ export function DepartmanlarPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', description: '' });
 
   const fetchList = () => {
@@ -54,8 +56,16 @@ export function DepartmanlarPage() {
     fetchList();
   }, []);
 
-  const handleOpenModal = () => {
+  const openCreate = () => {
     setForm({ name: '', description: '' });
+    setEditingId(null);
+    setFormError(null);
+    setModalOpen(true);
+  };
+
+  const openEdit = (row: DepartmentRow) => {
+    setForm({ name: row.name, description: row.description || '' });
+    setEditingId(row.id);
     setFormError(null);
     setModalOpen(true);
   };
@@ -69,14 +79,24 @@ export function DepartmanlarPage() {
     }
     setFormError(null);
     setSubmitLoading(true);
-    departmentsApi
-      .create({ name, description: form.description.trim() || null })
+    const body = { name, description: form.description.trim() || null };
+    (editingId ? departmentsApi.update(editingId, body) : departmentsApi.create(body))
       .then(() => {
         setModalOpen(false);
         fetchList();
       })
-      .catch((err) => setFormError(getErrorMessage(err, 'Departman eklenemedi')))
+      .catch((err) => setFormError(getErrorMessage(err, editingId ? 'Güncellenemedi' : 'Eklenemedi')))
       .finally(() => setSubmitLoading(false));
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (!window.confirm(`"${name}" departmanını silmek istediğinize emin misiniz?`)) return;
+    setDeletingId(id);
+    departmentsApi
+      .delete(id)
+      .then(() => fetchList())
+      .catch((err) => setError(getErrorMessage(err, 'Silinemedi')))
+      .finally(() => setDeletingId(null));
   };
 
   return (
@@ -89,8 +109,8 @@ export function DepartmanlarPage() {
             <div className="mono" style={{ marginBottom: '8px' }}>Departmanlar</div>
             <h1 className="studio-title">DEPARTMAN <span>LİSTESİ</span></h1>
           </div>
-          <button type="button" className="btn-premium" onClick={handleOpenModal} aria-label="Departman ekle">
-            <Plus size={18} aria-hidden="true" /> Ekle
+          <button type="button" className="btn-premium" onClick={openCreate} aria-label="Departman oluştur">
+            <Plus size={18} aria-hidden="true" /> Oluştur
           </button>
         </header>
         <div className="content-grid-wrapper" style={{ padding: '40px 60px' }}>
@@ -102,7 +122,7 @@ export function DepartmanlarPage() {
           )}
           {!loading && list.length === 0 && !error && (
             <div role="status" style={{ padding: 32, textAlign: 'center', background: 'var(--panel)', borderRadius: 12, border: '1px dashed var(--border)', color: 'var(--text-dim)' }}>
-              <p style={{ margin: 0 }}>Henüz departman yok. &quot;Ekle&quot; ile ilk departmanı ekleyin.</p>
+              <p style={{ margin: 0 }}>Henüz departman yok. &quot;Oluştur&quot; ile ekleyin.</p>
             </div>
           )}
           {list.length > 0 && (
@@ -112,6 +132,7 @@ export function DepartmanlarPage() {
                   <tr style={{ background: 'var(--panel)' }}>
                     <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Ad</th>
                     <th style={{ padding: 12, textAlign: 'left', borderBottom: '1px solid var(--border)' }}>Açıklama</th>
+                    <th style={{ padding: 12, width: 100, borderBottom: '1px solid var(--border)' }} aria-label="İşlemler" />
                   </tr>
                 </thead>
                 <tbody>
@@ -119,6 +140,10 @@ export function DepartmanlarPage() {
                     <tr key={row.id} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: 12 }}>{row.name}</td>
                       <td style={{ padding: 12, color: 'var(--text-dim)' }}>{row.description || '—'}</td>
+                      <td style={{ padding: 8, display: 'flex', gap: 4 }}>
+                        <button type="button" aria-label="Düzenle" onClick={() => openEdit(row)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: 6 }}><Pencil size={18} /></button>
+                        <button type="button" aria-label="Sil" onClick={() => handleDelete(row.id, row.name)} disabled={deletingId === row.id} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: deletingId === row.id ? 'wait' : 'pointer', padding: 6 }}><Trash2 size={18} /></button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -129,10 +154,10 @@ export function DepartmanlarPage() {
       </main>
 
       {modalOpen && (
-        <div role="dialog" aria-modal="true" aria-labelledby="add-department-title" style={overlayStyle} onClick={() => setModalOpen(false)}>
+        <div role="dialog" aria-modal="true" aria-labelledby="dept-modal-title" style={overlayStyle} onClick={() => setModalOpen(false)}>
           <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h2 id="add-department-title" className="studio-title" style={{ margin: 0, fontSize: '1.1rem' }}>DEPARTMAN EKLE</h2>
+              <h2 id="dept-modal-title" className="studio-title" style={{ margin: 0, fontSize: '1.1rem' }}>{editingId ? 'DEPARTMAN DÜZENLE' : 'DEPARTMAN OLUŞTUR'}</h2>
               <button type="button" aria-label="Kapat" onClick={() => setModalOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: 4 }}>
                 <X size={20} />
               </button>
@@ -166,7 +191,7 @@ export function DepartmanlarPage() {
               </div>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                 <button type="button" onClick={() => setModalOpen(false)} style={{ padding: '10px 18px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'inherit', cursor: 'pointer' }}>İptal</button>
-                <button type="submit" className="btn-premium" disabled={submitLoading} style={{ padding: '10px 18px' }}>{submitLoading ? 'Ekleniyor…' : 'Kaydet'}</button>
+                <button type="submit" className="btn-premium" disabled={submitLoading} style={{ padding: '10px 18px' }}>{submitLoading ? 'Kaydediliyor…' : 'Kaydet'}</button>
               </div>
             </form>
           </div>
