@@ -2,6 +2,21 @@ import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { startOfWeek, addDays, format } from 'date-fns';
 
+interface EmployeeRow {
+    id: string;
+    user_id: string;
+    name: string;
+    department_name: string | null;
+}
+
+interface ShiftTypeRow {
+    id: string;
+    name: string;
+    start_time: string;
+    end_time: string;
+    color_code: string | null;
+}
+
 export async function POST(request: Request) {
     try {
         const { date } = await request.json();
@@ -13,17 +28,17 @@ export async function POST(request: Request) {
 
         // 1. Verileri Çek
         const empRes = await query(`
-      SELECT e.id, e.user_id, u.full_name as name, d.name as department_name 
-      FROM employees e
-      JOIN users u ON e.user_id = u.id
-      LEFT JOIN departments d ON e.department_id = d.id
-    `);
-        const employees = empRes.rows;
+            SELECT e.id, e.user_id, u.full_name as name, d.name as department_name 
+            FROM employees e
+            JOIN users u ON e.user_id = u.id
+            LEFT JOIN departments d ON e.department_id = d.id
+        `);
+        const employees = empRes.rows as EmployeeRow[];
 
         const typeRes = await query('SELECT * FROM shift_types');
-        const shiftTypes = typeRes.rows;
+        const shiftTypes = typeRes.rows as ShiftTypeRow[];
         // Name -> Type mapping
-        const typeMap = new Map(shiftTypes.map(t => [t.name, t]));
+        const typeMap = new Map<string, ShiftTypeRow>(shiftTypes.map(t => [t.name, t]));
 
         if (!typeMap.has('OFF') || !typeMap.has('1')) {
             return NextResponse.json({ error: 'Gerekli vardiya türleri (1, OFF) bulunamadı. Lütfen sistem yöneticisine başvurun.' }, { status: 500 });
@@ -35,7 +50,7 @@ export async function POST(request: Request) {
         await query('DELETE FROM shifts WHERE shift_date >= $1 AND shift_date <= $2', [startDateStr, endDateStr]);
 
         const schedule = [];
-        const employeeOffCounts = new Map(); // id -> count
+        const employeeOffCounts = new Map<string, number>(); // id -> count
         employees.forEach(e => employeeOffCounts.set(e.id, 0));
 
         // Her gün için planla
@@ -43,18 +58,18 @@ export async function POST(request: Request) {
             const currentDayStr = format(weekDays[dayIndex], 'yyyy-MM-dd');
 
             // Departman bazlı sayaçlar (O gün için)
-            const deptOffs = {};
-            const deptEvening = {};
+            const deptOffs: Record<string, number> = {};
+            const deptEvening: Record<string, number> = {};
 
             // Personel listesini karıştır (randomness)
             const shuffledEmps = [...employees].sort(() => Math.random() - 0.5);
 
             for (const emp of shuffledEmps) {
                 const dept = emp.department_name || 'Diğer';
-                const offCountTotal = employeeOffCounts.get(emp.id);
+                const offCountTotal = employeeOffCounts.get(emp.id) || 0;
 
                 // Varsayılan: Sabahçı (1)
-                let assignedType = typeMap.get('1');
+                let assignedType = typeMap.get('1')!;
 
                 // OFF Kararı
                 // Max 2 OFF haftalık + Departman Kuralları
@@ -83,7 +98,7 @@ export async function POST(request: Request) {
                 if (daysLeft < offsNeeded) forceOff = true;
 
                 if ((canBeOff && Math.random() < 0.3) || (canBeOff && forceOff)) {
-                    assignedType = typeMap.get('OFF');
+                    assignedType = typeMap.get('OFF')!;
                     deptOffs[dept] = (deptOffs[dept] || 0) + 1;
                     employeeOffCounts.set(emp.id, offCountTotal + 1);
                 } else {
@@ -94,14 +109,14 @@ export async function POST(request: Request) {
 
                     if (hasOff && !hasEve && ['PİYANO', 'DAVUL', 'KASA', 'STÜDYO'].includes(dept)) {
                         // Zorunlu Akşam
-                        assignedType = typeMap.get('2') || typeMap.get('3');
+                        assignedType = typeMap.get('2') || typeMap.get('3') || typeMap.get('1')!;
                     } else {
                         // Rastgele
                         const rnd = Math.random();
-                        if (rnd < 0.6) assignedType = typeMap.get('1'); // %60 1 (Sabah)
-                        else if (rnd < 0.8) assignedType = typeMap.get('2'); // %20 2
-                        else if (rnd < 0.9) assignedType = typeMap.get('3'); // %10 3
-                        else assignedType = typeMap.get('1');
+                        if (rnd < 0.6) assignedType = typeMap.get('1')!; // %60 1 (Sabah)
+                        else if (rnd < 0.8) assignedType = typeMap.get('2') || typeMap.get('1')!; // %20 2
+                        else if (rnd < 0.9) assignedType = typeMap.get('3') || typeMap.get('1')!; // %10 3
+                        else assignedType = typeMap.get('1')!;
                     }
 
                     if (['2', '3', '4'].includes(assignedType.name)) {
@@ -123,7 +138,7 @@ export async function POST(request: Request) {
         for (const item of schedule) {
             await query(
                 `INSERT INTO shifts (employee_id, shift_type_id, shift_date, start_time, end_time, status)
-             VALUES ($1, $2, $3, $4, $5, 'APPROVED')`,
+                 VALUES ($1, $2, $3, $4, $5, 'APPROVED')`,
                 [item.employee_id, item.shift_type_id, item.shift_date, item.start_time, item.end_time]
             );
         }
