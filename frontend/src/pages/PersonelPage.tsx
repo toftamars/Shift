@@ -66,7 +66,9 @@ export function PersonelPage() {
             >
               <p style={{ margin: 0, fontSize: '1rem' }}>Henüz personel kaydı yok.</p>
               <p style={{ margin: '8px 0 0', fontSize: '0.875rem', opacity: 0.8 }}>
-                Çalışanlar Supabase Auth ile eklendikten sonra burada listelenir.
+                1) Supabase Dashboard → Authentication → Users → kullanıcı ekle.
+                <br />
+                2) SQL Editor ile <code style={{ fontSize: '0.8em' }}>employees</code> tablosuna <code style={{ fontSize: '0.8em' }}>user_id</code> + sicil no ekle. Detay: <code style={{ fontSize: '0.8em' }}>docs/CALISAN_EKLEME.md</code>
               </p>
             </div>
           )}
