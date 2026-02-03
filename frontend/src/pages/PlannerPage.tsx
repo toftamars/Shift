@@ -36,7 +36,7 @@ function PlannerPage() {
   );
 
   const shiftsByKey = useMemo(
-    () => buildShiftsByKey(shifts, weekDays, employees.map((e) => e.id)),
+    () => buildShiftsByKey(shifts, weekDays, employees.map((e) => String(e.id))),
     [shifts, weekDays, employees]
   );
 
