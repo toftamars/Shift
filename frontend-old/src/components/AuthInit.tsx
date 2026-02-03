@@ -1,10 +1,8 @@
-'use client';
-
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { supabase } from '@/lib/supabase';
-import { setAuth, logout } from '@/store/authSlice';
-import type { User } from '@/store/authSlice';
+import { supabase } from '../lib/supabase';
+import { setAuth, logout } from '../store/authSlice';
+import type { User } from '../store/authSlice';
 
 export function AuthInit({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();

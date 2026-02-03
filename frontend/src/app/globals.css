@@ -1,0 +1,316 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Web Interface Guidelines: color-scheme dark, explicit transitions */
+:root {
+  color-scheme: dark;
+  --accent: #6366f1;
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #ffffff;
+  --text-dim: #666666;
+  --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Web Interface Guidelines: skip link for main content */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 0.75rem 1rem;
+  background: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus {
+  left: 0;
+  top: 0;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* #root her zaman en üstte; tıklamalar mutlaka içeriğe gitsin */
+#root {
+  position: relative;
+  z-index: 2147483647;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  isolation: isolate;
+}
+
+/* --- Layout System --- */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
+}
+
+/* Grain artık body'de değil, .app-container içinde (PlannerPage/Login'de) */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: var(--grain);
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.sidebar {
+  width: 80px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 0;
+  gap: 40px;
+  background: var(--panel);
+}
+
+.main-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* --- Components --- */
+header {
+  padding: 40px 60px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.studio-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 4rem;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+
+.studio-title span {
+  opacity: 0.3;
+}
+
+.content-grid-wrapper {
+  flex: 1;
+  padding: 40px 60px;
+  overflow: auto;
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Sol: tarih sütunu (sabit), sağ: personel sütunları */
+.shift-grid {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid var(--border);
+  background: var(--border);
+  min-height: 0;
+}
+
+/* Sol sütun: Takvim + günler alt alta */
+.shift-grid-date-col {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 140px;
+  border-right: 1px solid var(--border);
+}
+
+.shift-grid-date-col .date-col-cell {
+  border-bottom: 1px solid var(--border);
+}
+
+.shift-grid-date-col .date-col-cell:last-child {
+  border-bottom: none;
+}
+
+/* Sağ: personel grid (başlık satırı + 7 gün satırı) */
+.shift-grid-body {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--emp-count, 4), 1fr);
+  grid-auto-rows: minmax(100px, auto);
+  gap: 1px;
+  overflow: auto;
+}
+
+.grid-cell {
+  background: var(--bg);
+  padding: 15px;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Skill: rendering-content-visibility — defer off-screen grid cells */
+.grid-cell-shift {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 100px;
+}
+
+.header-cell {
+  background: var(--panel);
+  text-align: center;
+  padding: 20px 15px;
+  min-height: 80px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.date-cell {
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+}
+
+.personel-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.shift-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 12px;
+  border-left: 3px solid var(--accent);
+  margin-bottom: 8px;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.shift-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shift-card {
+    transition: none;
+  }
+  .shift-card:hover {
+    transform: none;
+  }
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.btn-premium {
+  background: white;
+  color: black;
+  border: none;
+  padding: 12px 24px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-premium:hover {
+  filter: invert(1);
+}
+
+.sidebar-icon,
+.sidebar button {
+  color: var(--text-dim);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color 0.3s ease;
+}
+
+.sidebar-icon.active {
+  color: white;
+}
+
+/* Web Interface Guidelines: focus-visible, no outline-none without replacement */
+button,
+a[href],
+input,
+[role="button"] {
+  pointer-events: auto;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+
+.btn-retry:focus-visible,
+.btn-premium:focus-visible {
+  box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-icon {
+    transition: none;
+  }
+}
+
+/* Floating BG */
+.bg-glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+  filter: blur(60px);
+  z-index: -1;
+  pointer-events: none;
+}

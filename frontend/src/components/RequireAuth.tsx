@@ -1,7 +1,9 @@
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store';
+import type { RootState } from '@/store';
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -9,10 +11,17 @@ interface RequireAuthProps {
 
 export function RequireAuth({ children }: RequireAuthProps) {
   const token = useSelector((state: RootState) => state.auth.token);
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!token) {
+      router.push('/login');
+    }
+  }, [token, router, pathname]);
 
   if (!token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return null;
   }
 
   return <>{children}</>;

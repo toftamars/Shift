@@ -3,10 +3,10 @@ import { AUTH_STORAGE_KEYS } from '../store/authSlice';
 
 // Vercel'de (*.vercel.app) veya canonical host'ta API aynı origin'de; aksi halde localhost
 const getApiBaseUrl = (): string => {
-  if (typeof window === 'undefined') return '/api/v1'; // SSR durumunda
+  if (typeof window === 'undefined') return '/api/v1';
   const host = window.location.hostname;
-  if (host.endsWith('.vercel.app')) return '/api/v1';
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+  if (host === 'shift-mauve.vercel.app' || host.endsWith('.vercel.app')) return '/api/v1';
+  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 };
 const API_URL = getApiBaseUrl();
 
@@ -42,7 +42,7 @@ api.interceptors.request.use((config) => {
   try {
     const token = localStorage.getItem(AUTH_STORAGE_KEYS.token);
     if (token) config.headers.Authorization = `Bearer ${token}`;
-  } catch { }
+  } catch {}
   return config;
 });
 
@@ -53,7 +53,7 @@ api.interceptors.response.use(
       try {
         localStorage.removeItem(AUTH_STORAGE_KEYS.token);
         localStorage.removeItem(AUTH_STORAGE_KEYS.user);
-      } catch { }
+      } catch {}
       window.location.href = '/login';
     }
     return Promise.reject(err);

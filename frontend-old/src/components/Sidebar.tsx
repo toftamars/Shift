@@ -1,28 +1,26 @@
-'use client';
-
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { useRouter, usePathname } from 'next/navigation';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutGrid, Users, Building2, Zap, Settings, LogOut } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { logout } from '@/store/authSlice';
+import { supabase } from '../lib/supabase';
+import { logout } from '../store/authSlice';
 
 const btnStyle: React.CSSProperties = { background: 'none', border: 'none', padding: 0, color: 'inherit', cursor: 'pointer' };
 
 export const Sidebar: React.FC = () => {
     const dispatch = useDispatch();
-    const router = useRouter();
-    const pathname = usePathname();
-    const isPlanner = pathname === '/';
-    const isPersonel = pathname === '/personel';
-    const isDepartmanlar = pathname === '/departmanlar';
-    const isVardiyaTurleri = pathname === '/vardiya-turleri';
-    const isAyarlar = pathname === '/ayarlar';
+    const navigate = useNavigate();
+    const location = useLocation();
+    const isPlanner = location.pathname === '/';
+    const isPersonel = location.pathname === '/personel';
+    const isDepartmanlar = location.pathname === '/departmanlar';
+    const isVardiyaTurleri = location.pathname === '/vardiya-turleri';
+    const isAyarlar = location.pathname === '/ayarlar';
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
         dispatch(logout());
-        router.push('/login');
+        navigate('/login', { replace: true });
     };
 
     return (
@@ -36,7 +34,7 @@ export const Sidebar: React.FC = () => {
                     if (isPlanner) {
                         document.querySelector('.content-grid-wrapper')?.scrollTo({ top: 0, behavior: 'smooth' });
                     } else {
-                        router.push('/');
+                        navigate('/');
                     }
                 }}
             >
@@ -47,7 +45,7 @@ export const Sidebar: React.FC = () => {
                 className={`sidebar-icon ${isPersonel ? 'active' : ''}`}
                 aria-label="Personel"
                 style={btnStyle}
-                onClick={() => router.push('/personel')}
+                onClick={() => navigate('/personel')}
             >
                 <Users size={24} aria-hidden="true" />
             </button>
@@ -56,7 +54,7 @@ export const Sidebar: React.FC = () => {
                 className={`sidebar-icon ${isDepartmanlar ? 'active' : ''}`}
                 aria-label="Departmanlar"
                 style={btnStyle}
-                onClick={() => router.push('/departmanlar')}
+                onClick={() => navigate('/departmanlar')}
             >
                 <Building2 size={24} aria-hidden="true" />
             </button>
@@ -65,7 +63,7 @@ export const Sidebar: React.FC = () => {
                 className={`sidebar-icon ${isVardiyaTurleri ? 'active' : ''}`}
                 aria-label="Vardiya türleri"
                 style={btnStyle}
-                onClick={() => router.push('/vardiya-turleri')}
+                onClick={() => navigate('/vardiya-turleri')}
             >
                 <Zap size={24} aria-hidden="true" />
             </button>
@@ -75,7 +73,7 @@ export const Sidebar: React.FC = () => {
                     className={`sidebar-icon ${isAyarlar ? 'active' : ''}`}
                     aria-label="Ayarlar"
                     style={btnStyle}
-                    onClick={() => router.push('/ayarlar')}
+                    onClick={() => navigate('/ayarlar')}
                 >
                     <Settings size={24} aria-hidden="true" />
                 </button>
