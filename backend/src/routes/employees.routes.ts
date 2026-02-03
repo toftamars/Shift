@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Router, Request, Response } from 'express';
 import { query, getClient } from '../config/database';
 import { authenticate } from '../middleware/auth.middleware';
@@ -6,17 +7,18 @@ const router = Router();
 
 router.use(authenticate);
 
-// Sayfadan doğrudan ekleme: name + email ile user + employee oluşturur (Supabase Auth’a gerek yok)
+// Sayfadan doğrudan ekleme: name + department + hire_date; e-posta ve sicil no otomatik üretilir
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { name, email, department_id: departmentId, employee_code: employeeCode, hire_date: hireDate } = req.body;
+    const { name, department_id: departmentId, hire_date: hireDate } = req.body;
     const fullName = name != null ? String(name).trim() : '';
-    const emailStr = email != null ? String(email).trim() : '';
-    const code = employeeCode != null ? String(employeeCode).trim() : '';
-    if (!fullName || !emailStr || !code || !hireDate) {
-      return res.status(400).json({ error: 'Ad soyad, e-posta, sicil no ve işe giriş tarihi gerekli' });
+    if (!fullName || !hireDate) {
+      return res.status(400).json({ error: 'Ad soyad ve işe giriş tarihi gerekli' });
     }
     const deptId = departmentId && String(departmentId).trim() !== '' ? departmentId : null;
+    const shortId = randomUUID().replace(/-/g, '').slice(0, 8);
+    const emailStr = `emp-${shortId}@internal`;
+    const code = `EMP-${shortId}`;
 
     const client = await getClient();
     try {
@@ -45,9 +47,7 @@ router.post('/', async (req: Request, res: Response) => {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.includes('unique') || msg.includes('duplicate')) {
-      if (msg.includes('email')) return res.status(409).json({ error: 'Bu e-posta zaten kayıtlı' });
-      if (msg.includes('employee_code')) return res.status(409).json({ error: 'Bu sicil numarası zaten kullanılıyor' });
-      return res.status(409).json({ error: 'Bu e-posta veya sicil no zaten kayıtlı' });
+      return res.status(409).json({ error: 'Kayıt oluşturulamadı, tekrar deneyin' });
     }
     console.error(err);
     return res.status(500).json({ error: 'Çalışan eklenemedi' });

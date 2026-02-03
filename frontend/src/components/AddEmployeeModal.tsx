@@ -42,8 +42,6 @@ export function AddEmployeeModal({ open, onClose, onSuccess }: AddEmployeeModalP
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '',
-    email: '',
-    employee_code: '',
     department_id: '',
     hire_date: format(new Date(), 'yyyy-MM-dd'),
   });
@@ -66,10 +64,8 @@ export function AddEmployeeModal({ open, onClose, onSuccess }: AddEmployeeModalP
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const name = form.name.trim();
-    const email = form.email.trim();
-    const code = form.employee_code.trim();
-    if (!name || !email || !code || !form.hire_date) {
-      setError('Ad soyad, e-posta, sicil no ve işe giriş tarihi gerekli.');
+    if (!name || !form.hire_date) {
+      setError('Ad soyad ve işe giriş tarihi gerekli.');
       return;
     }
     setError(null);
@@ -77,8 +73,6 @@ export function AddEmployeeModal({ open, onClose, onSuccess }: AddEmployeeModalP
     employeesApi
       .create({
         name,
-        email,
-        employee_code: code,
         department_id: form.department_id || null,
         hire_date: form.hire_date,
       })
@@ -120,31 +114,7 @@ export function AddEmployeeModal({ open, onClose, onSuccess }: AddEmployeeModalP
               />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label htmlFor="emp-email" style={{ display: 'block', marginBottom: 6, fontSize: '0.875rem', color: 'var(--text-dim)' }}>E-posta *</label>
-              <input
-                id="emp-email"
-                type="email"
-                required
-                value={form.email}
-                onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                placeholder="ornek@sirket.com"
-                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'inherit' }}
-              />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label htmlFor="emp-code" style={{ display: 'block', marginBottom: 6, fontSize: '0.875rem', color: 'var(--text-dim)' }}>Sicil no *</label>
-              <input
-                id="emp-code"
-                type="text"
-                required
-                value={form.employee_code}
-                onChange={(e) => setForm((p) => ({ ...p, employee_code: e.target.value }))}
-                placeholder="Örn. SICIL001"
-                style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'inherit' }}
-              />
-            </div>
-            <div style={{ marginBottom: 16 }}>
-              <label htmlFor="emp-dept" style={{ display: 'block', marginBottom: 6, fontSize: '0.875rem', color: 'var(--text-dim)' }}>Departman (opsiyonel)</label>
+              <label htmlFor="emp-dept" style={{ display: 'block', marginBottom: 6, fontSize: '0.875rem', color: 'var(--text-dim)' }}>Departman</label>
               <select
                 id="emp-dept"
                 value={form.department_id}
@@ -156,6 +126,7 @@ export function AddEmployeeModal({ open, onClose, onSuccess }: AddEmployeeModalP
                   <option key={d.id} value={d.id}>{d.name}</option>
                 ))}
               </select>
+              {departments.length === 0 && <p style={{ margin: '6px 0 0', fontSize: '0.8rem', color: 'var(--text-dim)' }}>Önce Departmanlar sayfasından departman oluşturun.</p>}
             </div>
             <div style={{ marginBottom: 20 }}>
               <label htmlFor="emp-hire" style={{ display: 'block', marginBottom: 6, fontSize: '0.875rem', color: 'var(--text-dim)' }}>İşe giriş tarihi *</label>

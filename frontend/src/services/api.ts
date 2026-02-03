@@ -66,7 +66,7 @@ export const employeesApi = {
       '/employees' + (departmentId ? `?department_id=${departmentId}` : '')
     ),
   get: (id: string) => api.get(`/employees/${id}`),
-  create: (body: { name: string; email: string; department_id?: string | null; employee_code: string; hire_date: string }) =>
+  create: (body: { name: string; department_id?: string | null; hire_date: string }) =>
     api.post<{ id: string }>('/employees', body),
   delete: (id: string) => api.delete(`/employees/${id}`),
 };
